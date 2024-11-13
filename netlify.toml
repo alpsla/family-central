@@ -1,22 +1,17 @@
 [build]
   command = "npm run build"
   publish = "dist"
-  environment = { NODE_VERSION = "20" }
-
-[context.production]
-  environment = { 
-    NODE_ENV = "production"
-    VITE_APP_URL = "https://familycentral.io"
-  }
-
-[context.deploy-preview]
-  environment = { 
-    NODE_ENV = "production"
-    VITE_APP_URL = "https://jocular-quokka-b1e951.netlify.app"
-  }
 
 [build.environment]
   NODE_VERSION = "20"
+
+[context.production.environment]
+  NODE_ENV = "production"
+  VITE_APP_URL = "https://familycentral.io"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+  VITE_APP_URL = "https://jocular-quokka-b1e951.netlify.app"
 
 [[redirects]]
   from = "/*"
@@ -26,7 +21,7 @@
 
 [[headers]]
   for = "/*"
-    [headers.values]
+  [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
 [forms]
