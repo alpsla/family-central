@@ -36,36 +36,4 @@ const handler: Handler = async (event) => {
     if (!to || !subject || !html) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing required fields' }),
-      };
-    }
-
-    // Send email using SendGrid
-    await sgMail.send({
-      from: 'noreply@familycentral.io',
-      to,
-      subject,
-      html,
-      trackingSettings: {
-        clickTracking: { enable: true },
-        openTracking: { enable: true }
-      }
-    });
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Email sent successfully' }),
-    };
-  } catch (error) {
-    console.error('Error sending email:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ 
-        error: 'Failed to send email',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }),
-    };
-  }
-}
-
-export { handler };
+        body: JSON.stringify({ error: 'Missing req
