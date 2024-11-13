@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NPM_FLAGS = "--no-audit --no-fund"
 
 [context.production.environment]
   NODE_ENV = "production"
@@ -23,6 +24,9 @@
   for = "/*"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+
+[functions]
+  directory = "netlify/functions"
 
 [forms]
   [forms.contact]
