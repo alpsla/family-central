@@ -5,14 +5,7 @@
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
-
-[context.production.environment]
-  NODE_ENV = "production"
   VITE_APP_URL = "https://familycentral.io"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "production"
-  VITE_APP_URL = "https://jocular-quokka-b1e951.netlify.app"
 
 [[redirects]]
   from = "/*"
@@ -24,6 +17,3 @@
   for = "/*"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
-
-[functions]
-  directory = "netlify/functions"
