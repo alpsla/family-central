@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Menu, X, UserCircle } from 'lucide-react';
 import { useAuthStore } from '../lib/store/auth';
+import type { User } from '../lib/auth/types';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,11 +19,20 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
-  const getUserDisplayName = () => {
+  const getUserDisplayName = (user: User | null) => {
     if (!user) return '';
+    
+    // Try user_metadata first
+    if (user.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+
+    // Then try direct properties
     const parts = [];
     if (user.familyName) parts.push(user.familyName);
     if (user.name) parts.push(user.name);
+    
+    // Fallback to email
     return parts.length > 0 ? parts.join(' • ') : user.email.split('@')[0];
   };
 
@@ -45,7 +55,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-2 text-gray-700">
                 <UserCircle className="h-5 w-5" />
                 <span className="font-medium">
-                  {getUserDisplayName()}
+                  {getUserDisplayName(user)}
                 </span>
               </div>
             )}
@@ -82,7 +92,7 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2 px-2 py-1 text-gray-700">
                   <UserCircle className="h-5 w-5" />
                   <span className="font-medium">
-                    {getUserDisplayName()}
+                    {getUserDisplayName(user)}
                   </span>
                 </div>
               )}

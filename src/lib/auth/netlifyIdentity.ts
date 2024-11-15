@@ -1,5 +1,6 @@
 import netlifyIdentity from 'netlify-identity-widget';
 import { logger } from '../utils/logger';
+import type { User } from './types';
 
 export const initNetlifyIdentity = () => {
   try {
@@ -11,11 +12,11 @@ export const initNetlifyIdentity = () => {
     });
 
     // Log user events in development
-    netlifyIdentity.on('init', user => {
+    netlifyIdentity.on('init', (user: User | null) => {
       logger.info('NetlifyIdentity initialized', { data: { user: user?.email } });
     });
 
-    netlifyIdentity.on('login', user => {
+    netlifyIdentity.on('login', (user: User) => {
       logger.success('User logged in', { data: { email: user.email } });
       // Close the modal after login
       netlifyIdentity.close();
@@ -31,14 +32,15 @@ export const initNetlifyIdentity = () => {
       window.location.href = '/';
     });
 
-    netlifyIdentity.on('error', err => {
+    netlifyIdentity.on('error', (err: Error) => {
       logger.error('NetlifyIdentity error', { data: err });
     });
 
-    // Handle email confirmation
-    netlifyIdentity.on('confirmation', () => {
-      logger.success('Email confirmed');
-      window.location.href = '/';
+    // Handle email verification
+    netlifyIdentity.on('login', (user: User) => {
+      if (user.email_verified) {
+        logger.success('Email verified', { data: { email: user.email } });
+      }
     });
   } catch (error) {
     logger.error('Failed to initialize Netlify Identity', { data: error });
@@ -63,7 +65,7 @@ export const netlifyAuth = {
   logout() {
     netlifyIdentity.logout();
   },
-  getCurrentUser() {
-    return netlifyIdentity.currentUser();
+  getCurrentUser(): User | null {
+    return netlifyIdentity.currentUser() as User | null;
   }
 };
