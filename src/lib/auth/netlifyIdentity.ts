@@ -6,7 +6,8 @@ export const initNetlifyIdentity = () => {
     logger.info('Initializing Netlify Identity');
     
     netlifyIdentity.init({
-      locale: 'en'
+      locale: 'en',
+      APIUrl: 'https://familycentral.io/.netlify/identity'
     });
 
     // Log user events in development
@@ -33,6 +34,12 @@ export const initNetlifyIdentity = () => {
     netlifyIdentity.on('error', err => {
       logger.error('NetlifyIdentity error', { data: err });
     });
+
+    // Handle email confirmation
+    netlifyIdentity.on('confirmation', () => {
+      logger.success('Email confirmed');
+      window.location.href = '/';
+    });
   } catch (error) {
     logger.error('Failed to initialize Netlify Identity', { data: error });
   }
@@ -42,10 +49,10 @@ export const netlifyAuth = {
   signup() {
     netlifyIdentity.open('signup');
   },
-  login(provider?: 'google') {
-    if (provider === 'google') {
+  login(provider?: 'github') {
+    if (provider === 'github') {
       netlifyIdentity.open('login');
-      const loginTab = document.querySelector('[data-provider="google"]');
+      const loginTab = document.querySelector('[data-provider="github"]');
       if (loginTab) {
         (loginTab as HTMLElement).click();
       }

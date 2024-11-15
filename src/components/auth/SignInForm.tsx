@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, Chrome } from 'lucide-react';
+import { Mail, Lock, Github } from 'lucide-react';
 import { netlifyAuth } from '../../lib/auth/netlifyIdentity';
 import { logger } from '../../lib/utils/logger';
 
@@ -24,13 +24,13 @@ export default function SignInForm() {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGitHubLogin = () => {
     try {
-      logger.info('Initiating Google login');
-      netlifyAuth.login('google');
+      logger.info('Initiating GitHub login');
+      netlifyAuth.login('github');
     } catch (err) {
-      logger.error('Google login failed', { data: err });
-      setError(t('auth.googleLoginFailed'));
+      logger.error('GitHub login failed', { data: err });
+      setError(t('auth.githubLoginFailed'));
     }
   };
 
@@ -43,11 +43,11 @@ export default function SignInForm() {
       )}
 
       <button
-        onClick={handleGoogleLogin}
+        onClick={handleGitHubLogin}
         className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
       >
-        <Chrome className="h-5 w-5" />
-        {t('auth.continueWithGoogle')}
+        <Github className="h-5 w-5" />
+        {t('auth.continueWithGitHub')}
       </button>
 
       <div className="relative">

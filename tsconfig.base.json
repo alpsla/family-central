@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",
+      "useDefineForClassFields": true,
+      "skipLibCheck": true,
+      "types": ["node", "vite/client"],
+      "typeRoots": ["./node_modules/@types"],
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
+    }
+  }

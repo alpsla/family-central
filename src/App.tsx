@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Bell, Users, Heart, Utensils, Film, Shield } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -10,6 +9,8 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 import VerifyPendingPage from './pages/auth/VerifyPendingPage';
 import AuthGuard from './components/auth/AuthGuard';
+import EmailTest from './components/EmailTest';
+import DevVerificationStatus from './components/DevVerificationStatus';
 
 const App = () => {
   const features = [
@@ -68,6 +69,14 @@ const App = () => {
             />
           </Routes>
           <Footer />
+          
+          {/* Development Tools */}
+          {!import.meta.env.PROD && (
+            <>
+              <EmailTest />
+              <DevVerificationStatus />
+            </>
+          )}
         </AuthGuard>
       </div>
     </Router>
