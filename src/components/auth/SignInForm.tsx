@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { netlifyAuth } from '../../lib/auth/netlifyIdentity';
 import { logger } from '../../lib/utils/logger';
 
+// Declare global type for Netlify Identity
 declare global {
   interface Window {
     netlifyIdentity: any;

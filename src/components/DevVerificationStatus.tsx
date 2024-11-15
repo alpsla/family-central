@@ -1,10 +1,27 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../lib/store/auth';
 import { useVerificationStore } from '../lib/store/verification';
 
 export default function DevVerificationStatus() {
-  const { user } = useAuthStore();
-  const { pendingVerifications } = useVerificationStore();
+  const [user, setUser] = useState(useAuthStore.getState().user);
+  const [pendingVerifications, setPendingVerifications] = useState(
+    useVerificationStore.getState().pendingVerifications
+  );
+
+  useEffect(() => {
+    const unsubAuth = useAuthStore.subscribe(
+      state => setUser(state.user)
+    );
+
+    const unsubVerification = useVerificationStore.subscribe(
+      state => setPendingVerifications(state.pendingVerifications)
+    );
+
+    return () => {
+      unsubAuth();
+      unsubVerification();
+    };
+  }, []);
 
   // Only show in development
   if (import.meta.env.PROD) return null;

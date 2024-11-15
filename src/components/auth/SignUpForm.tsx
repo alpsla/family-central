@@ -1,12 +1,12 @@
-import React from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Users } from 'lucide-react';
-import { useAuthStore } from '../../lib/store/auth';
 import { logger } from '../../lib/utils/logger';
+import { emailService } from '../../lib/email/service';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -29,12 +29,12 @@ type SignUpFormData = z.infer<typeof schema>;
 export default function SignUpForm() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setUser, setToken } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     watch,
     setError,
   } = useForm<SignUpFormData>({
@@ -52,14 +52,15 @@ export default function SignUpForm() {
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      logger.info('Starting sign-up process', { data: { email: data.email, name: data.name } });
+      setIsSubmitting(true);
+      logger.info('Starting signup process', { data: { email: data.email } });
 
       // Check if user already exists
       const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
       const userExists = existingUsers.some((user: any) => user.email === data.email);
 
       if (userExists) {
-        logger.warn('Sign-up failed: Email already exists', { data: { email: data.email } });
+        logger.warn('Email already registered', { data: { email: data.email } });
         setError('email', {
           type: 'manual',
           message: 'Email already registered'
@@ -73,32 +74,41 @@ export default function SignUpForm() {
         email: data.email,
         name: data.name,
         familyName: data.familyName,
-        password: data.password,
-        emailVerified: true,
+        password: data.password, // In production, this should be hashed
+        emailVerified: false,
         createdAt: new Date().toISOString(),
       };
 
       // Store user
       localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
-      logger.success('User created successfully');
+      logger.info('User created successfully', { data: { userId: newUser.id } });
 
-      // Generate JWT-like token
-      const token = btoa(JSON.stringify({
-        userId: newUser.id,
-        email: newUser.email,
-        exp: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
-      }));
+      // Send verification email
+      await emailService.sendEmail({
+        to: data.email,
+        subject: 'Verify your FamilyHub account',
+        html: `
+          <p>Welcome to FamilyHub! Please verify your email by clicking the link below:</p>
+          <p><a href="${window.location.origin}/verify-email?token=${newUser.id}&email=${encodeURIComponent(data.email)}">
+            Verify Email
+          </a></p>
+        `
+      });
 
-      // Update auth store
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      setToken(token);
+      logger.success('Signup completed successfully', { data: { email: data.email } });
 
-      // Navigate to home page
-      logger.info('Redirecting to home page');
-      navigate('/', { replace: true });
+      // Navigate to verification pending page
+      navigate('/auth/verify-pending', { replace: true });
     } catch (error) {
-      logger.error('Sign-up failed', { data: error });
+      logger.error('Signup failed', { 
+        data: error instanceof Error ? error.message : 'Unknown error'
+      });
+      setError('root', {
+        type: 'manual',
+        message: 'Failed to create account. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -154,9 +164,7 @@ export default function SignUpForm() {
           <Mail className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
         {errors.email && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.email.message || t('validation.email')}
-          </p>
+          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
         )}
       </div>
 
@@ -214,23 +222,20 @@ export default function SignUpForm() {
         )}
       </div>
 
+      {errors.root && (
+        <p className="text-sm text-red-600 text-center">
+          {errors.root.message}
+        </p>
+      )}
+
       <div>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed"
         >
           {isSubmitting ? t('common.loading') : t('auth.signUp')}
         </button>
-      </div>
-
-      <div className="text-center">
-        <a
-          href="/auth"
-          className="text-sm text-blue-600 hover:text-blue-500"
-        >
-          {t('auth.alreadyHaveAccount')}
-        </a>
       </div>
     </form>
   );
