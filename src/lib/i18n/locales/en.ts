@@ -74,10 +74,9 @@ export const en = {
     verificationFailedDescription: 'The verification link is invalid or has expired.',
     verificationEmailSent: 'We have sent a verification link to your email address. Please check your inbox and click the link to verify your account.',
     loginFailed: 'Login failed. Please try again.',
-    googleLoginFailed: 'Google login failed. Please try again.',
     emailLoginFailed: 'Email login failed. Please try again.',
-    continueWithGoogle: 'Continue with Google',
-    orContinueWith: 'Or continue with',
+    continueWithEmail: 'Continue with Email',
+    orContinueWith: 'Or',
     passwordRequirements: {
       minLength: 'At least 8 characters',
       uppercase: 'One uppercase letter',

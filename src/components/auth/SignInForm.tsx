@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, Github } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 import { netlifyAuth } from '../../lib/auth/netlifyIdentity';
 import { logger } from '../../lib/utils/logger';
 
@@ -14,23 +14,13 @@ export default function SignInForm() {
   const { t } = useTranslation();
   const [error, setError] = useState<string>('');
 
-  const handleLogin = () => {
+  const handleEmailLogin = () => {
     try {
       logger.info('Initiating email login');
       netlifyAuth.login();
     } catch (err) {
       logger.error('Login failed', { data: err });
-      setError(t('auth.loginFailed'));
-    }
-  };
-
-  const handleGitHubLogin = () => {
-    try {
-      logger.info('Initiating GitHub login');
-      netlifyAuth.login('github');
-    } catch (err) {
-      logger.error('GitHub login failed', { data: err });
-      setError(t('auth.githubLoginFailed'));
+      setError(t('auth.emailLoginFailed'));
     }
   };
 
@@ -43,11 +33,11 @@ export default function SignInForm() {
       )}
 
       <button
-        onClick={handleGitHubLogin}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        onClick={handleEmailLogin}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
       >
-        <Github className="h-5 w-5" />
-        {t('auth.continueWithGitHub')}
+        <Mail className="h-5 w-5" />
+        {t('auth.continueWithEmail')}
       </button>
 
       <div className="relative">
@@ -61,12 +51,11 @@ export default function SignInForm() {
         </div>
       </div>
 
-      <button
-        onClick={handleLogin}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
-        {t('auth.signIn')}
-      </button>
+      <div className="mt-6 text-center text-sm">
+        <a href="/auth?mode=signup" className="text-blue-600 hover:text-blue-500">
+          {t('auth.noAccount')}
+        </a>
+      </div>
     </div>
   );
 }

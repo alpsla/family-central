@@ -67,20 +67,20 @@ export default function SignUpForm() {
         return;
       }
 
-      // Create new user (auto-verified in development)
+      // Create new user
       const newUser = {
         id: crypto.randomUUID(),
         email: data.email,
         name: data.name,
         familyName: data.familyName,
         password: data.password,
-        emailVerified: true, // Auto-verify in development
+        emailVerified: true,
         createdAt: new Date().toISOString(),
       };
 
       // Store user
       localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
-      logger.success('User created and stored successfully');
+      logger.success('User created successfully');
 
       // Generate JWT-like token
       const token = btoa(JSON.stringify({
@@ -98,7 +98,7 @@ export default function SignUpForm() {
       logger.info('Redirecting to home page');
       navigate('/', { replace: true });
     } catch (error) {
-      logger.error('Sign-up process failed', { data: { error } });
+      logger.error('Sign-up failed', { data: error });
     }
   };
 
@@ -222,6 +222,15 @@ export default function SignUpForm() {
         >
           {isSubmitting ? t('common.loading') : t('auth.signUp')}
         </button>
+      </div>
+
+      <div className="text-center">
+        <a
+          href="/auth"
+          className="text-sm text-blue-600 hover:text-blue-500"
+        >
+          {t('auth.alreadyHaveAccount')}
+        </a>
       </div>
     </form>
   );
