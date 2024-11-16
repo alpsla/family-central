@@ -32,13 +32,13 @@ export default function DevVerificationStatus() {
       <div className="space-y-2">
         <div>
           <strong>Current User:</strong>
-          <pre className="mt-1 text-xs">
+          <pre className="mt-1 text-xs overflow-auto">
             {JSON.stringify(user, null, 2)}
           </pre>
         </div>
         <div>
           <strong>Pending Verifications:</strong>
-          <pre className="mt-1 text-xs">
+          <pre className="mt-1 text-xs overflow-auto">
             {JSON.stringify(pendingVerifications, null, 2)}
           </pre>
         </div>

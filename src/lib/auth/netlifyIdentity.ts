@@ -1,71 +1,91 @@
-import netlifyIdentity from 'netlify-identity-widget';
 import { logger } from '../utils/logger';
 import type { User } from './types';
 
-export const initNetlifyIdentity = () => {
+// Mock storage for users
+const USERS_STORAGE_KEY = 'mock_users';
+const AUTH_USER_KEY = 'mock_current_user';
+
+const getStoredUsers = (): User[] => {
   try {
-    logger.info('Initializing Netlify Identity');
-    
-    netlifyIdentity.init({
-      locale: 'en',
-      APIUrl: 'https://familycentral.io/.netlify/identity'
-    });
+    return JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
 
-    // Log user events in development
-    netlifyIdentity.on('init', (user: User | null) => {
-      logger.info('NetlifyIdentity initialized', { data: { user: user?.email } });
-    });
+const setStoredUsers = (users: User[]) => {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+};
 
-    netlifyIdentity.on('login', (user: User) => {
-      logger.success('User logged in', { data: { email: user.email } });
-      // Close the modal after login
-      netlifyIdentity.close();
-      // Redirect after a short delay to ensure state is updated
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 300);
-    });
+const getCurrentUser = (): User | null => {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null');
+  } catch {
+    return null;
+  }
+};
 
-    netlifyIdentity.on('logout', () => {
-      logger.info('User logged out');
-      netlifyIdentity.close();
-      window.location.href = '/';
-    });
+const setCurrentUser = (user: User | null) => {
+  if (user) {
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(AUTH_USER_KEY);
+  }
+};
 
-    netlifyIdentity.on('error', (err: Error) => {
-      logger.error('NetlifyIdentity error', { data: err });
-    });
-
-    // Handle email verification
-    netlifyIdentity.on('login', (user: User) => {
-      if (user.email_verified) {
-        logger.success('Email verified', { data: { email: user.email } });
-      }
-    });
-  } catch (error) {
-    logger.error('Failed to initialize Netlify Identity', { data: error });
+export const initNetlifyIdentity = () => {
+  logger.info('Initializing Mock Auth');
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    logger.info('Found existing session', { data: { email: currentUser.email } });
   }
 };
 
 export const netlifyAuth = {
-  signup() {
-    netlifyIdentity.open('signup');
-  },
-  login(provider?: 'github') {
-    if (provider === 'github') {
-      netlifyIdentity.open('login');
-      const loginTab = document.querySelector('[data-provider="github"]');
-      if (loginTab) {
-        (loginTab as HTMLElement).click();
-      }
-    } else {
-      netlifyIdentity.open('login');
+  signup(email: string, password: string, userData: Partial<User> = {}) {
+    const users = getStoredUsers();
+    const existingUser = users.find(u => u.email === email);
+    
+    if (existingUser) {
+      throw new Error('User already exists');
     }
+
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      email,
+      role: 'user',
+      created_at: new Date().toISOString(),
+      email_verified: false,
+      ...userData
+    };
+
+    users.push(newUser);
+    setStoredUsers(users);
+    setCurrentUser(newUser);
+    
+    logger.success('User signed up successfully', { data: { email } });
+    return newUser;
   },
+
+  login(email: string, password: string) {
+    const users = getStoredUsers();
+    const user = users.find(u => u.email === email);
+    
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+
+    setCurrentUser(user);
+    logger.success('User logged in successfully', { data: { email } });
+    return user;
+  },
+
   logout() {
-    netlifyIdentity.logout();
+    setCurrentUser(null);
+    logger.info('User logged out');
   },
+
   getCurrentUser(): User | null {
-    return netlifyIdentity.currentUser() as User | null;
+    return getCurrentUser();
   }
 };
